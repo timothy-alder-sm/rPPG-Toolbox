@@ -67,6 +67,9 @@ def calculate_metrics(predictions, labels, config):
             window_frame_size = video_frame_size
             overlap = 0
             
+        temp_gt = []
+        temp_pred = []
+            
         for i in range(0, len(prediction), window_frame_size - overlap):
             pred_window = prediction[i:i+window_frame_size]
             label_window = label[i:i+window_frame_size]

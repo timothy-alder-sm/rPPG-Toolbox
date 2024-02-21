@@ -11,15 +11,19 @@ from unsupervised_methods.methods.OMIT import *
 from tqdm import tqdm
 from evaluation.BlandAltmanPy import BlandAltman
 
+import cv2
+
+
+
+
 def unsupervised_predict(config, data_loader, method_name):
     """ Model evaluation on the testing dataset."""
     if data_loader["unsupervised"] is None:
         raise ValueError("No data for unsupervised method predicting")
     print("===Unsupervised Method ( " + method_name + " ) Predicting ===")
-    predict_hr_peak_all = []
-    gt_hr_peak_all = []
-    predict_hr_fft_all = []
-    gt_hr_fft_all = []
+
+    predict_hr_all = []
+    gt_hr_all = []
     SNR_all = []
     MACC_all = []
     sbar = tqdm(data_loader["unsupervised"], ncols=80)
@@ -27,6 +31,7 @@ def unsupervised_predict(config, data_loader, method_name):
         batch_size = test_batch[0].shape[0]
         for idx in range(batch_size):
             data_input, labels_input = test_batch[0][idx].cpu().numpy(), test_batch[1][idx].cpu().numpy()
+            
             if method_name == "POS":
                 BVP = POS_WANG(data_input, config.UNSUPERVISED.DATA.FS)
             elif method_name == "CHROM":
@@ -43,7 +48,7 @@ def unsupervised_predict(config, data_loader, method_name):
                 BVP = OMIT(data_input)
             else:
                 raise ValueError("unsupervised method name wrong!")
-
+            
             video_frame_size = test_batch[0].shape[1]
             if config.INFERENCE.EVALUATION_WINDOW.USE_SMALLER_WINDOW:
                 window_frame_size = config.INFERENCE.EVALUATION_WINDOW.WINDOW_SIZE * config.UNSUPERVISED.DATA.FS
@@ -58,11 +63,14 @@ def unsupervised_predict(config, data_loader, method_name):
                 window_frame_size = video_frame_size
                 overlap = 0
 
+            temp_gt = []
+            temp_pred = []
+
             for i in range(0, len(BVP), window_frame_size - overlap):
                 BVP_window = BVP[i:i+window_frame_size]
                 label_window = labels_input[i:i+window_frame_size]
 
-                if len(BVP_window) < 9:
+                if len(BVP_window) <= 9:
                     print(f"Window frame size of {len(BVP_window)} is smaller than minimum pad length of 9. Window ignored!")
                     continue
 
@@ -83,6 +91,9 @@ def unsupervised_predict(config, data_loader, method_name):
                 else:
                     raise ValueError("Inference evaluation method name wrong!")
     print("Used Unsupervised Method: " + method_name)
+    
+    # print("GT HR: ", gt_hr_all)
+    # print("Predict HR: ", predict_hr_all)
 
     # Filename ID to be used in any results files (e.g., Bland-Altman plots) that get saved
     if config.TOOLBOX_MODE == 'unsupervised_method':
