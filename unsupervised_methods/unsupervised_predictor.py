@@ -11,10 +11,6 @@ from unsupervised_methods.methods.OMIT import *
 from tqdm import tqdm
 from evaluation.BlandAltmanPy import BlandAltman
 
-import cv2
-
-
-
 
 def unsupervised_predict(config, data_loader, method_name):
     """ Model evaluation on the testing dataset."""
@@ -70,8 +66,8 @@ def unsupervised_predict(config, data_loader, method_name):
                 BVP_window = BVP[i:i+window_frame_size]
                 label_window = labels_input[i:i+window_frame_size]
 
-                if len(BVP_window) <= 9:
-                    print(f"Window frame size of {len(BVP_window)} is smaller than minimum pad length of 9. Window ignored!")
+                if len(BVP_window) < window_frame_size:
+                    # print(f"Window frame size of {len(BVP_window)} is smaller than window size of {window_frame_size}. Window ignored!")
                     continue
 
                 if config.INFERENCE.EVALUATION_METHOD == "peak detection":

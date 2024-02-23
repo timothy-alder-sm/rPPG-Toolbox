@@ -74,8 +74,8 @@ def calculate_metrics(predictions, labels, config):
             pred_window = prediction[i:i+window_frame_size]
             label_window = label[i:i+window_frame_size]
 
-            if len(pred_window) < 9:
-                print(f"Window frame size of {len(pred_window)} is smaller than minimum pad length of 9. Window ignored!")
+            if len(pred_window) <= 9:
+                print(f"Window frame size of {len(pred_window)} is smaller than window size of {window_frame_size}. Window ignored!")
                 continue
 
             if config.TEST.DATA.PREPROCESS.LABEL_TYPE == "Standardized" or \
