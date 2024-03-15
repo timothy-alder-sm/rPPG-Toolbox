@@ -16,7 +16,7 @@ def unsupervised_predict(config, data_loader, method_name):
     """ Model evaluation on the testing dataset."""
     if data_loader["unsupervised"] is None:
         raise ValueError("No data for unsupervised method predicting")
-    print("===Unsupervised Method ( " + method_name + " ) Predicting ===")
+    print("\n===Unsupervised Method ( " + method_name + " ) Predicting ===")
 
     predict_hr_all = []
     gt_hr_all = []
