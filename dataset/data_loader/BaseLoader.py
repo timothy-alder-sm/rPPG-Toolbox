@@ -217,9 +217,9 @@ class BaseLoader(Dataset):
             begin(float): index of begining during train/val split.
             end(float): index of ending during train/val split.
         """
-        data_dirs_split = self.split_raw_data(data_dirs, begin, end)  # partition dataset 
+        data_dirs_split = self.split_raw_data(data_dirs, begin, end)  # partition dataset # UNCOMMENT LATER
         # send data directories to be processed
-        file_list_dict = self.multi_process_manager(data_dirs_split, config_preprocess) 
+        file_list_dict = self.multi_process_manager(data_dirs_split, config_preprocess) # UNCOMMENT LATER
         self.build_file_list(file_list_dict)  # build file list
         self.load_preprocessed_data()  # load all data and corresponding labels (sorted for consistency)
         print("Total Number of raw files preprocessed:", len(data_dirs_split), end='\n\n')
@@ -513,6 +513,7 @@ class BaseLoader(Dataset):
             np.save(input_path_name, frames_clips[i])
             np.save(label_path_name, bvps_clips[i])
             count += 1
+        print(f"SAVED {filename}") # DEBUGGING
         return input_path_name_list, label_path_name_list
 
     def multi_process_manager(self, data_dirs, config_preprocess, multi_process_quota=8):
