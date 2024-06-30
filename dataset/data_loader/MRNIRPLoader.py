@@ -97,6 +97,9 @@ class MRNIRPLoader(BaseLoader):
         file_list_df = pd.read_csv(file_list_path)
         base_inputs = file_list_df['input_files'].tolist()
         filtered_inputs = []
+        print(self.filtering.SELECT_TASKS)
+        print(self.filtering.TASK_LIST)
+        print(base_inputs)
 
         for input in base_inputs:
             input_name = input.split(os.sep)[-1].split('.')[0].rsplit('_', 1)[0]
@@ -112,7 +115,7 @@ class MRNIRPLoader(BaseLoader):
                 if input_name in self.filtering.EXCLUSION_LIST or subject_name in self.filtering.EXCLUSION_LIST or task in self.filtering.EXCLUSION_LIST or subject_task in self.filtering.EXCLUSION_LIST:
                     continue
 
-            # print(input_name)
+            print(input_name)
             filtered_inputs.append(input)
 
         if not filtered_inputs:
@@ -142,7 +145,7 @@ class MRNIRPLoader(BaseLoader):
                     frame = cv2.cvtColor(frame, cv2.COLOR_BAYER_BG2RGB)         # Demosaice rggb to RGB Image
                     frame = (frame >> 8).astype(np.uint8)                       # convert from uint16 to uint8
                     
-                    # downsample frames (otherwise processing time becomes WAY TOO LONG)
+                    # downsample frames (otherwise proces sing time becomes WAY TOO LONG)
                     if resize_dim is not None:
                         dim_w = min(resize_dim, frame.shape[1])
                         dim_h = int(dim_w * frame.shape[0] / frame.shape[1])
@@ -258,12 +261,13 @@ class MRNIRPLoader(BaseLoader):
 
 
     def preprocess_dataset_subprocess(self, data_dirs, config_preprocess, i, file_list_dict):
-        """ invoked by preprocess_dataset for multi_process."""        
+        """ invoked by preprocess_dataset for multi_process."""  
         # Skip corrupted frames
         if data_dirs[i]['index'] == "subject2_garage_small_motion_940":
             return
-        # frames = self.read_video(os.path.join(data_dirs[i]['path'], "RGB.zip"))
-        frames = self.read_video_unzipped(os.path.join(data_dirs[i]['path'], "RGB"))
+        print(f"PROCESSING {data_dirs[i]['index']}")      # DEBUGGING
+        # frames = self.read_video(os.path.join(data_dirs[i]['path'], "NIR.zip"))
+        frames = self.read_video_unzipped(os.path.join(data_dirs[i]['path'], "NIR"))
 
         if self.config_data.PREPROCESS.USE_PSUEDO_PPG_LABEL:
             bvps = self.generate_pos_psuedo_labels(frames, fs=self.config_data.FS)
@@ -278,5 +282,6 @@ class MRNIRPLoader(BaseLoader):
         # bvps = BaseLoader.resample_ppg(bvps, target_length)
 
         frames_clips, bvps_clips = self.preprocess(frames, bvps, config_preprocess)
+        print(f"REQUESTING SAVE {data_dirs[i]['index']}")
         input_name_list, _ = self.save_multi_process(frames_clips, bvps_clips, data_dirs[i]['index'])
         file_list_dict[i] = input_name_list
